@@ -4,14 +4,12 @@ services:
   apidb:
     container_name: apidb
     restart: always
-    ports:
-      - "1433:1433"
 
   webapi:
     container_name: webapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:db=Data Source=apidb;Initial Catalog=df;user id=sa;password=yourStrong(!)Password;"
+      - "ConnectionStrings:db=\"Data Source=apidb;Initial Catalog=df;user id=sa;password=Qwert.123;\""
     depends_on:
       - apidb
     ports:

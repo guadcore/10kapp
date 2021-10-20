@@ -10,8 +10,9 @@ namespace Data
 
   public static class DH
   {
-    private static ushort TOk => 0;
-    private static ushort TFail => 1;
+    public static ushort TOk => 0;
+    public static ushort TFail => 1;
+    public static ushort TFailDB => 10;
 
     public static string CS { get; set; }
 
@@ -41,6 +42,52 @@ namespace Data
       catch (Exception e)
       {
         return Tuple.Create(TFail, e.ToString(), (IEnumerable<Client>) null);
+      }
+    }
+
+    public static async Task<Tuple<ushort, string, Client>> CreateClient(Client aClient)
+    {
+      try
+      {
+        var result = await DB.Clients.AddAsync(aClient);
+        await DB.SaveChangesAsync();
+        return Tuple.Create(TOk, string.Empty, result.Entity);
+      }
+      catch (Exception e)
+      {
+        return Tuple.Create(TFail, e.ToString(), (Client)null);
+      }
+    }
+
+    public static async Task<Tuple<ushort, string, Client>> UpdateClient(Client aClient)
+    {
+      Client dbClient = null;
+
+      try
+      {
+        dbClient = await DB.Clients.SingleAsync(x => x.Id == aClient.Id);
+      }
+      catch (Exception eNotFound)
+      {
+        return Tuple.Create(TFailDB, eNotFound.ToString(), aClient);
+      }
+
+      try
+      {
+        dbClient.Firstname = aClient.Firstname;
+        dbClient.Lastname = aClient.Lastname;
+        dbClient.Birthdate = aClient.Birthdate;
+        dbClient.Cellphone = aClient.Cellphone;
+        dbClient.Email = aClient.Email;
+
+        await DB.SaveChangesAsync();
+
+        return Tuple.Create(TOk, string.Empty, dbClient);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+        return Tuple.Create(TFail, e.ToString(), (Client) null);
       }
     }
   }
